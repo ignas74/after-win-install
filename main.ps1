@@ -8,6 +8,8 @@ $downloadLinks = @(
     "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi"
 )
 
+Write-Host "Downloading software's .exe files..."
+
 for ($i = 0; $i -lt $downloadLinks.Count; $i++) {
     try {
         $filePath = "C:\Users\$currentUser\Downloads\$([System.IO.Path]::GetFileName($downloadLinks[$i]))"
@@ -17,12 +19,26 @@ for ($i = 0; $i -lt $downloadLinks.Count; $i++) {
         Start-Process $filePath
     }
     catch {
-        Write-Error "Error downloading $($downloadLinks[$i])"
-        return
+        Write-Warning "Error downloading $($downloadLinks[$i])..."
     }
 }
 
-Invoke-WebRequest -UseBasicParsing "https://christitus.com/win" | Invoke-Expression
+Write-Host "Downloading https://christitus.com/win..."
 
+try {
+    Invoke-WebRequest -UseBasicParsing "https://christitus.com/win" | Invoke-Expression
+}
+catch {
+    Write-Warning "Error downloading christitus.com/win..."
+}
 
-# Write-Host "Current user: C:\Users\$currentUser\Downloads\ninite.exe"
+Write-Host "Removing Appx..."
+
+Get-AppxPackage | Where-Object {
+    $_.Name -notlike "*store*" -and 
+    $_.Name -notlike "*ScreenSketch*" -and
+    $_.Name -notlike "*WindowsCalculator*" 
+    # To add...
+} | Remove-AppxPackage
+
+Write-Host "Script finished."
