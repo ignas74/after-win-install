@@ -1,5 +1,7 @@
-$currentUser = $env:USERNAME 
+# Before running the script, run Windows PowerShell as admin and enter: 
+# Set-ExecutionPolicy Unrestricted
 
+$currentUser = $env:USERNAME 
 $downloadLinks = @(
     "https://ninite.com/chrome-discord-spotify-steam-vlc-vscode-winrar/ninite.exe",
     "https://files.modecom.com/files/klawiatury/Volcano_Gamer_96_BT/Software/volcano_gamer_96_BT_software_V1.0.5_20220919.zip",
@@ -8,37 +10,68 @@ $downloadLinks = @(
     "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi"
 )
 
-Write-Host "Downloading software's .exe files..."
+function Download-Files {
+    param (
+        [string[]]$Links
+    )
+    
+    Set-Variable ProgressPreference SilentlyContinue
 
-for ($i = 0; $i -lt $downloadLinks.Count; $i++) {
+    foreach ($link in $Links) {
+        try {
+            $filePath = "C:\Users\$currentUser\Downloads\$([System.IO.Path]::GetFileName($link))"
+            Write-Output "Downloading file from: $link" 
+            Write-Output "Saving to: $filePath"
+            Invoke-WebRequest -UseBasicParsing -Uri $link -OutFile $filePath -ErrorAction Stop
+            Start-Process $filePath
+        }
+        catch {
+            Write-Warning "Error downloading $link: $_"
+        }
+    }
+
+    Write-Output "Downloading https://christitus.com/win: $_"
     try {
-        $filePath = "C:\Users\$currentUser\Downloads\$([System.IO.Path]::GetFileName($downloadLinks[$i]))"
-        Write-Host "Downloading file from: $($downloadLinks[$i])" ; Write-Host "Saving to: $($filePath)"
-        Set-Variable ProgressPreference SilentlyContinue 
-        Invoke-WebRequest -UseBasicParsing -Uri $downloadLinks[$i] -OutFile $filePath
-        Start-Process $filePath
+        Invoke-WebRequest -UseBasicParsing "https://christitus.com/win" | Invoke-Expression -ErrorAction Stop
     }
     catch {
-        Write-Warning "Error downloading $($downloadLinks[$i])..."
+        Write-Warning "Error downloading https://christitus.com/win..."
     }
 }
 
-Write-Host "Downloading https://christitus.com/win..."
-
-try {
-    Invoke-WebRequest -UseBasicParsing "https://christitus.com/win" | Invoke-Expression
+Write-Output "Removing Appx..."
+$packagesToRemove = Get-AppxPackage | Where-Object {
+    $_.Name -notlike "*Store*" -and 
+    $_.Name -notlike "*Microsoft.ScreenSketch*" -and
+    $_.Name -notlike "*WindowsCalculator*" -and
+    $_.Name -notlike "*WindowsCamera*" -and
+    $_.Name -notlike "*WindowsNotepad*" -and
+    $_.Name -notlike "*Microsoft.Paint*" -and
+    $_.Name -notlike "*Clipchamp.Clipchamp*" -and
+    $_.Name -notlike "*Microsoft.Windows.Photos*" -and
+    $_.Name -notlike "*Microsoft.WindowsAlarms*" -and
+    $_.Name -notlike "*NVIDIA*" -and
+    $_.Name -notlike "*.NET*" -and
+    $_.Name -notlike "*Realtek*" -and
+    $_.Name -notlike "*Xbox*" -and
+    $_.Name -notlike "*BingWeather*" -and
+    $_.Name -notlike "*MicrosoftStickyNotes*" -and
+    $_.Name -notlike "*Microsoft.Todos*" -and
+    $_.Name -notlike "*WindowsSoundRecorder*" -and
+    $_.Name -notlike "*DTSInc.*"
+    # Add more conditions if needed  
 }
-catch {
-    Write-Warning "Error downloading christitus.com/win..."
+
+if ($packagesToRemove) {
+    $packagesToRemove | Remove-AppxPackage
+}
+else {
+    Write-Output "No packages found to remove."
 }
 
-Write-Host "Removing Appx..."
+Write-Output "Downloading software's .exe files..."
+Download-Files -Links $downloadLinks
 
-Get-AppxPackage | Where-Object {
-    $_.Name -notlike "*store*" -and 
-    $_.Name -notlike "*ScreenSketch*" -and
-    $_.Name -notlike "*WindowsCalculator*" 
-    # To add...
-} | Remove-AppxPackage
+Set-ExecutionPolicy Restricted
 
-Write-Host "Script finished."
+Write-Output "Script finished."
