@@ -7,7 +7,8 @@ $downloadLinks = @(
     "https://files.modecom.com/files/klawiatury/Volcano_Gamer_96_BT/Software/volcano_gamer_96_BT_software_V1.0.5_20220919.zip",
     "https://uk.download.nvidia.com/GFE/GFEClient/3.27.0.112/GeForce_Experience_v3.27.0.112.exe",
     "https://dlcdnets.asus.com/pub/ASUS/mb/14Utilities/ArmouryCrateInstallTool.zip",
-    "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi"
+    "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi",
+    "https://protonvpn.com/download/ProtonVPN_v3.2.10.exe"
 )
 
 function Download-Files {
